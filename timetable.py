@@ -17,8 +17,8 @@ DAY_RE = re.compile(
 TIME_RE = re.compile(r"(\d{1,2}:\d{2})\D+(\d{1,2}:\d{2})")
 CHANGE_WORDS = ("Замена", "Перенос", "Внеплановый", "Отмен", "не будет")
 
-CACHE_TTL = 300  
-_cache = {}  
+CACHE_TTL = 300
+_cache = {}
 
 
 @dataclass
@@ -116,7 +116,7 @@ def format_day(data: dict, day: date):
     title = f"{WEEKDAYS[day.weekday()]}, {day.strftime('%d.%m')}"
     lessons = data[day]
     if not lessons:
-        return f"{title}\n\nПар нет 🎉"
+        return f"{title}\n\nПар нет"
     lines = [title, ""]
     for lesson in lessons:
         mark = "⚠️ " if lesson.changed else ""
@@ -127,7 +127,8 @@ def format_day(data: dict, day: date):
 
 
 def format_week(data: dict) -> str:
-    return "\n\n".join(format_day(data, d) for d in sorted(data))
+    days = [d for d in sorted(data) if d.weekday() < 5 or data[d]]
+    return "\n\n".join(format_day(data, d) for d in days)
 
 
 def format_changes(data: dict):
@@ -149,7 +150,6 @@ def format_bells(data: dict):
     return "\n".join(f"{s}–{e}" for s, e in slots)
 
 
-# ---------- Ручная проверка ----------
 
 if __name__ == "__main__":
     default_url = "https://site.mstimetables.ru/01a00f53d32773b5b396bf3eb6f57ce2/groups/309"
